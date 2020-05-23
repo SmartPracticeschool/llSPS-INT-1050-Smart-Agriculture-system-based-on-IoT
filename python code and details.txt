@@ -1,0 +1,69 @@
+Organization ID=8nuxrp
+Device Type=smart_agri
+Device ID=123456789
+Authentication Method=use-token-auth
+Authentication Token=Nikhil@1997
+
+api key =a-8nuxrp-kjhxwcdfru
+api token =H7x4zih(yLV(iUXJyV
+
+weather api=api.openweathermap.org/data/2.5/weather?q=Mumbai, IN&appid=4c944df90721d6bdddc39df1cf2226ff
+api key =4c944df90721d6bdddc39df1cf2226ff
+city=Mumbai, IN
+
+
+
+python code
+python -m pip install --upgrade pip
+
+import time
+import sys
+import ibmiotf.application # to install pip install ibmiotf
+import ibmiotf.device
+
+#Provide your IBM Watson Device Credentials
+organization = "8nuxrp" #replace the ORG ID
+deviceType = "smart_agri"#replace the Device type wi
+deviceId = "123456789"#replace Device ID
+authMethod = "token"
+authToken = "Nikhil@1997" #Replace the authtoken
+
+def myCommandCallback(cmd): # function for Callback
+        print("Command received: %s" % cmd.data)
+        if cmd.data['command']=='MOTORON':
+                print("MOTOR ON IS RECEIVED")
+                          
+        elif cmd.data['command']=='MOTOROFF':
+                print("MOTOR OFF IS RECEIVED")
+                
+        if cmd.command == "setInterval":
+                
+                if 'interval' not in cmd.data:
+                        print("Error - command is missing required information: 'interval'")
+                else:
+                        interval = cmd.data['interval']
+        elif cmd.command == "print":
+                if 'message' not in cmd.data:
+                        print("Error - command is missing required information: 'message'")
+                else:
+                        output=cmd.data['message']
+                        print(output)
+
+try:
+	deviceOptions = {"org": organization, "type": deviceType, "id": deviceId, "auth-method": authMethod, "auth-token": authToken}
+	deviceCli = ibmiotf.device.Client(deviceOptions)
+	#..............................................
+	
+except Exception as e:
+	print("Caught exception connecting device: %s" % str(e))
+	sys.exit()
+
+# Connect and send a datapoint "hello" with value "world" into the cloud as an event of type "greeting" 10 times
+deviceCli.connect()
+
+while True:
+              
+        deviceCli.commandCallback = myCommandCallback
+
+# Disconnect the device and application from the cloud
+deviceCli.disconnect()
